@@ -36,6 +36,13 @@ func Errorf(f string, a ...any) Error {
 	return NewError(err, 1)
 }
 
+func (e Error) WithAttrs(attrs ...Attr) Error {
+	newAttrs := append(e.Attrs.Copy(), attrs...)
+
+	e.Attrs = newAttrs
+	return e
+}
+
 func (e Error) WithContextAttrs(ctx context.Context) Error {
 	attrs := AttrsFromContext(ctx)
 	newAttrs := append(e.Attrs.Copy(), attrs...)
@@ -55,7 +62,7 @@ func (e Error) Record() slog.Record {
 	return r
 }
 
-func (e Error) LogTo(ctx context.Context, logger slog.Logger) {
+func (e Error) LogTo(ctx context.Context, logger *slog.Logger) {
 	h := logger.Handler()
 	if !h.Enabled(ctx, slog.LevelError) {
 		return
